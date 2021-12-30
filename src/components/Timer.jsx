@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { interval, Subject } from 'rxjs'
-import { takeUntil } from 'rxjs/operators'
+import {  interval, Subject,debounceTime,Observable, timer,fromEvent,} from 'rxjs'
+import { takeUntil,scan,filter,tap,timeInterval,exhaustMap,buffer} from 'rxjs/operators'
 
 
 export default function Timer(){
@@ -9,7 +9,7 @@ export default function Timer(){
 
     useEffect(()=>{
         const stream$ = new Subject()
-        interval(1000)
+        interval(100)
         .pipe(takeUntil(stream$))
         .subscribe(() => {
             if(go){
@@ -30,9 +30,24 @@ export default function Timer(){
       setGo(false);
       setTime(0);
     }, []);
-    const wait = useCallback(() => {
-      setGo(false);
-    }, []);
+
+    useEffect(()=>{
+        let wait = document.querySelector('#wait')
+        var mouseDowns = fromEvent(wait, "click");
+
+        var doubleClicks = mouseDowns.
+        pipe(
+            timeInterval(),
+            scan((acc, val) => val.interval < 250 ? acc + 1 : 0, 0),
+            filter(val => val == 1),
+        )      
+        doubleClicks.subscribe({
+            next(){
+                setGo(false)   
+            }
+        })
+    },[])
+  
     const reset = useCallback(() => {
       setTime(0);
     }, []);
@@ -40,7 +55,7 @@ export default function Timer(){
     return(
         <div>
             <Time time={time}/>
-            <Btns go={go} start={start} wait={wait} stop={stop} reset={reset}/>
+            <Btns go={go} start={start} stop={stop} reset={reset}/>
         </div>
     )
 }
@@ -64,7 +79,7 @@ function Btns(props){
     return(
         <div>
             {go ? <button className="btn stop" onClick={()=> props.stop()}>Стоп</button> : <button className="btn start" onClick={()=> props.start()}>Старт</button>}
-            <button className="btn" onDoubleClick={()=> props.wait()}>Wait</button>
+            <button className="btn" id="wait">Wait</button>
             <button className="btn" onClick={()=> props.reset()}>Reset</button>
         </div>
     )
