@@ -38,7 +38,7 @@ export default function Timer(){
         var doubleClicks = mouseDowns.
         pipe(
             timeInterval(),
-            scan((acc, val) => val.interval < 250 ? acc + 1 : 0, 0),
+            scan((acc, val) => val.interval < 300 ? acc + 1 : 0, 0),
             filter(val => val == 1),
         )      
         doubleClicks.subscribe({
